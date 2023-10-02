@@ -113,7 +113,7 @@ struct rpmsg_net_priv {
     /** A lock for the net device transmitter. Used to avoid race condition on shutdown */
     spinlock_t shutdown_lock;
 
-    /** A flag indicating whether the interace is shutdown, or not */
+    /** A flag indicating whether the interface is shutdown, or not */
     bool is_shutdown;
 };
 
