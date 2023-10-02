@@ -286,9 +286,11 @@ static int rpmsg_callback(struct rpmsg_device *rpdev, void *data, int len, void 
         return -1;
     }
 
-    // silenty drop packet if interface is closed
-    if (netif_queue_stopped(priv->ndev)) {
-        return 0;
+    // drop packet if interface is shutdown
+    if (priv->is_shutdown) {
+        dev_err(&rpdev->dev, "ignoring packet on channel 0x%x -> 0x%x due to pending shutdown\n",
+                rpdev->src, rpdev->dst);
+        return -1;
     }
 
     // TODO stats (rx bytes)
