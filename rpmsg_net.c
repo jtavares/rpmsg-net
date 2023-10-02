@@ -247,6 +247,7 @@ static int rpmsg_callback(struct rpmsg_device *rpdev, void *data, int len, void 
     unsigned int maxLen;
     struct rpmsg_net_priv *priv;
     struct sk_buff *skb;
+    int ret;
 
     (void)src;
 
@@ -309,7 +310,17 @@ static int rpmsg_callback(struct rpmsg_device *rpdev, void *data, int len, void 
     skb->protocol = eth_type_trans(skb, priv->ndev);
 
     // inject incoming RPMsg frame into the network device's input queue (non-interrupt context)
-    netif_rx_ni(skb);
+    ret = netif_rx_ni(skb);
+    if (ret == NET_RX_DROP) {
+        if (debug >= DBG_RX_TX) {
+            dev_err(&rpdev->dev, "netif rx drop on channel 0x%x -> 0x%x with len %d\n",
+                    rpdev->src, rpdev->dst, len);
+        }
+
+        // TODO stats (dropped rx packet)
+
+        return -1;
+    }
 
     //TODO stats (rx packet)
 
